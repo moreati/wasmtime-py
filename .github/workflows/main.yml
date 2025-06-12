@@ -45,62 +45,65 @@ jobs:
     - uses: actions/checkout@v4
       with:
         # fetch all history so the git-commit-length-appended-to-version for
-        # publishes to `test.pypi.org` works. (see `git` command in `setup.py`)
+        # publishes to `test.pypi.org` works. See `ci/count-git-commits.py`.
         fetch-depth: 0
     - uses: ./.github/actions/setup
     - run: pip install setuptools wheel
+    - name: Determine dev version suffix
+      run: echo "VERSION_SUFFIX=.dev$(python ci/count-git-commits.py)" >> $GITHUB_ENV
+      if: startsWith(github.event.ref, 'refs/tags') == false
     # If this is a tagged build use real version numbers
-    - run: echo "PROD=true" >> $GITHUB_ENV
+    - run: echo "VERSION_SUFFIX=''" >> $GITHUB_ENV
       if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
     - name: Build source distribution
       run: |
         git clean -fdx wasmtime build
-        python setup.py sdist
+        python setup.py egg_info --tag-build="$VERSION_SUFFIX" sdist
     - run: |
         git clean -fdx wasmtime build
         python ci/download-wasmtime.py linux x86_64
         python ci/build-rust.py
-        python setup.py bdist_wheel --plat-name manylinux1-x86_64
+        python setup.py egg_info --tag-build="$VERSION_SUFFIX" bdist_wheel --plat-name manylinux1-x86_64
     - run: |
         git clean -fdx wasmtime build
         python ci/download-wasmtime.py linux aarch64
         python ci/build-rust.py
-        python setup.py bdist_wheel --plat-name manylinux2014_aarch64
+        python setup.py egg_info --tag-build="$VERSION_SUFFIX" bdist_wheel --plat-name manylinux2014_aarch64
     - run: |
         git clean -fdx wasmtime build
         python ci/download-wasmtime.py darwin x86_64
         python ci/build-rust.py
-        python setup.py bdist_wheel --plat-name macosx-10-13-x86_64
+        python setup.py egg_info --tag-build="$VERSION_SUFFIX" bdist_wheel --plat-name macosx-10-13-x86_64
     - run: |
         git clean -fdx wasmtime build
         python ci/download-wasmtime.py darwin arm64
         python ci/build-rust.py
-        python setup.py bdist_wheel --plat-name macosx-11-0-arm64
+        python setup.py egg_info --tag-build="$VERSION_SUFFIX" bdist_wheel --plat-name macosx-11-0-arm64
     - run: |
         git clean -fdx wasmtime build
         python ci/download-wasmtime.py win32 x86_64
         python ci/build-rust.py
-        python setup.py bdist_wheel --plat-name win-amd64
+        python setup.py egg_info --tag-build="$VERSION_SUFFIX" bdist_wheel --plat-name win-amd64
     - run: |
         git clean -fdx wasmtime build
         python ci/download-wasmtime.py win32 arm64
         python ci/build-rust.py
-        python setup.py bdist_wheel --plat-name win-arm64
+        python setup.py egg_info --tag-build="$VERSION_SUFFIX" bdist_wheel --plat-name win-arm64
     - run: |
         git clean -fdx wasmtime build
         python ci/download-wasmtime.py musl x86_64
         python ci/build-rust.py
-        python setup.py bdist_wheel --plat-name musllinux_1_2_x86_64
+        python setup.py egg_info --tag-build="$VERSION_SUFFIX" bdist_wheel --plat-name musllinux_1_2_x86_64
     - run: |
         git clean -fdx wasmtime build
         python ci/download-wasmtime.py android x86_64
         python ci/build-rust.py
-        python setup.py bdist_wheel --plat-name android_26_x86_64
+        python setup.py egg_info --tag-build="$VERSION_SUFFIX" bdist_wheel --plat-name android_26_x86_64
     - run: |
         git clean -fdx wasmtime build
         python ci/download-wasmtime.py android aarch64
         python ci/build-rust.py
-        python setup.py bdist_wheel --plat-name android_26_arm64_v8a
+        python setup.py egg_info --tag-build="$VERSION_SUFFIX" bdist_wheel --plat-name android_26_arm64_v8a
 
     # Build an "any" wheel with:
     #
@@ -115,7 +118,7 @@ jobs:
         git clean -fdx wasmtime build
         python ci/download-wasmtime.py win32 x86_64
         python ci/build-rust.py
-        python setup.py bdist_wheel
+        python setup.py egg_info --tag-build="$VERSION_SUFFIX" bdist_wheel
 
     - uses: actions/upload-artifact@v4
       with:
