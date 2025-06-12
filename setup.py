@@ -9,9 +9,17 @@ with open("README.md", "r") as fh:
 
 version = "33.0.0"
 
+
+def is_git_checkout():
+    "Return True if running from a Git checkout of the project."
+    base_dir = os.path.dirname(__file__)
+    git_dir = os.path.join(base_dir, '.git')
+    return os.path.isdir(git_dir)
+
+
 # Give unique version numbers to all commits so our publication-on-each commit
 # works on main
-if 'PROD' not in os.environ:
+if is_git_checkout() and 'PROD' not in os.environ:
     res = subprocess.run(['git', 'rev-list', 'HEAD', '--count'], capture_output=True, encoding="utf8")
     version += '.dev' + res.stdout.strip()
 
