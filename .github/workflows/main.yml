@@ -65,47 +65,38 @@ jobs:
     - run: |
         git clean -fdx wasmtime build
         python ci/download-wasmtime.py linux x86_64
-        python ci/build-rust.py
         python setup.py egg_info --tag-build="$VERSION_SUFFIX" bdist_wheel --plat-name manylinux1-x86_64
     - run: |
         git clean -fdx wasmtime build
         python ci/download-wasmtime.py linux aarch64
-        python ci/build-rust.py
         python setup.py egg_info --tag-build="$VERSION_SUFFIX" bdist_wheel --plat-name manylinux2014_aarch64
     - run: |
         git clean -fdx wasmtime build
         python ci/download-wasmtime.py darwin x86_64
-        python ci/build-rust.py
         python setup.py egg_info --tag-build="$VERSION_SUFFIX" bdist_wheel --plat-name macosx-10-13-x86_64
     - run: |
         git clean -fdx wasmtime build
         python ci/download-wasmtime.py darwin arm64
-        python ci/build-rust.py
         python setup.py egg_info --tag-build="$VERSION_SUFFIX" bdist_wheel --plat-name macosx-11-0-arm64
     - run: |
         git clean -fdx wasmtime build
         python ci/download-wasmtime.py win32 x86_64
-        python ci/build-rust.py
         python setup.py egg_info --tag-build="$VERSION_SUFFIX" bdist_wheel --plat-name win-amd64
     - run: |
         git clean -fdx wasmtime build
         python ci/download-wasmtime.py win32 arm64
-        python ci/build-rust.py
         python setup.py egg_info --tag-build="$VERSION_SUFFIX" bdist_wheel --plat-name win-arm64
     - run: |
         git clean -fdx wasmtime build
         python ci/download-wasmtime.py musl x86_64
-        python ci/build-rust.py
         python setup.py egg_info --tag-build="$VERSION_SUFFIX" bdist_wheel --plat-name musllinux_1_2_x86_64
     - run: |
         git clean -fdx wasmtime build
         python ci/download-wasmtime.py android x86_64
-        python ci/build-rust.py
         python setup.py egg_info --tag-build="$VERSION_SUFFIX" bdist_wheel --plat-name android_26_x86_64
     - run: |
         git clean -fdx wasmtime build
         python ci/download-wasmtime.py android aarch64
-        python ci/build-rust.py
         python setup.py egg_info --tag-build="$VERSION_SUFFIX" bdist_wheel --plat-name android_26_arm64_v8a
 
     # Build an "any" wheel with:
@@ -120,7 +111,6 @@ jobs:
     - run: |
         git clean -fdx wasmtime build
         python ci/download-wasmtime.py win32 x86_64
-        python ci/build-rust.py
         python setup.py egg_info --tag-build="$VERSION_SUFFIX" bdist_wheel
 
     - uses: actions/upload-artifact@v4
