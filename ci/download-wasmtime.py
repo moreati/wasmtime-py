@@ -1,6 +1,8 @@
-# Helper script to download a precompiled binary of the wasmtime dll for the
-# current platform.
+'''
+Download and unpack a precompiled wasmtime shared library & C headers.
+'''
 
+import argparse
 import io
 import platform
 import shutil
@@ -103,7 +105,17 @@ def main(platform, arch):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) > 2:
-        main(sys.argv[1], sys.argv[2])
-    else:
-        main(sys.platform, platform.machine())
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+    )
+    parser.add_argument(
+        'platform', default=sys.platform, nargs='?',
+        help='Platform to download for (default: %(default)s)',
+    )
+    parser.add_argument(
+        'arch', default=platform.machine(), nargs='?',
+        help='Architecture to download for (default: %(default)s)',
+    )
+    args = parser.parse_args()
+
+    main(args.platform, args.arch)
