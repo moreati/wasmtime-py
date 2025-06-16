@@ -3,7 +3,7 @@
 # - Declare wheels as platform specific, currently nameed as though pure Python
 # - cross-build wheels for other platforms/ISAs (`-C=--build-option=...`
 #   doeesn't appear to do it)
-# - Delete setuptools plumbing
+# - Delete setuptools plumbing (MANIFEST.in, setup.py)
 # - Change workflow to match
 
 [build-system]
