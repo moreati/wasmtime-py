@@ -1,25 +1,11 @@
 # type: ignore
 
 import setuptools
-import os
-import subprocess
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-version = "33.0.0"
-
-# Give unique version numbers to all commits so our publication-on-each commit
-# works on main
-# TODO Temporarily disable '.devNNN' version suffix while porting to PEP-517
-# https://github.com/bytecodealliance/wasmtime-py/pull/287#issuecomment-2979288710
-if False and 'PROD' not in os.environ:
-    res = subprocess.run(['git', 'rev-list', 'HEAD', '--count'], capture_output=True, encoding="utf8")
-    version += '.dev' + res.stdout.strip()
-
 setuptools.setup(
-    name="wasmtime",
-    version=version,
     author="The Wasmtime Project Developers",
     author_email="hello@bytecodealliance.org",
     description="A WebAssembly runtime powered by Wasmtime",
