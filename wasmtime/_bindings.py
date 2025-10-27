@@ -3,7 +3,6 @@
 # This is a procedurally generated file, DO NOT EDIT
 # instead edit `./ci/cbindgen.py` at the root of the repo
 
-from ctypes import *
 import ctypes
 from typing import Any
 from enum import Enum, auto

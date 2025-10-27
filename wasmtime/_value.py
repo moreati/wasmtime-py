@@ -9,7 +9,7 @@ if typing.TYPE_CHECKING:
     from ._store import Storelike
 
 
-@ctypes.CFUNCTYPE(None, c_void_p)
+@ctypes.CFUNCTYPE(None, ctypes.c_void_p)
 def _externref_finalizer(extern_id: int) -> None:
     Val._id_to_ref_count[extern_id] -= 1
     if Val._id_to_ref_count[extern_id] == 0:
@@ -17,7 +17,7 @@ def _externref_finalizer(extern_id: int) -> None:
         del Val._id_to_extern[extern_id]
 
 
-def _intern(obj: typing.Any) -> c_void_p:
+def _intern(obj: typing.Any) -> ctypes.c_void_p:
     extern_id = id(obj)
     Val._id_to_ref_count.setdefault(extern_id, 0)
     Val._id_to_ref_count[extern_id] += 1
@@ -112,7 +112,7 @@ class Val:
         return self._val == rhs
 
     @classmethod
-    def _convert_to_raw(cls, store: 'Storelike', ty: ValType, val: Any) -> wasmtime_val_t:
+    def _convert_to_raw(cls, store: 'Storelike', ty: ValType, val: typing.Any) -> wasmtime_val_t:
         if isinstance(val, Val):
             if ty != val.type:
                 raise TypeError("wrong type of `Val` provided")
@@ -153,7 +153,7 @@ class Val:
             if self._val is not None:
                 extern_id = _intern(self._val)
                 if not wasmtime_externref_new(store._context(), extern_id, _externref_finalizer,
-                                              byref(ret.of.externref)):
+                                              ctypes.byref(ret.of.externref)):
                     raise WasmtimeError("failed to create an externref value")
             else:
 
@@ -187,7 +187,7 @@ class Val:
             raise WasmtimeError("Unkown `wasmtime_valkind_t`: {}".format(raw.kind))
 
         if owned:
-            wasmtime_val_unroot(byref(raw))
+            wasmtime_val_unroot(ctypes.byref(raw))
 
         return Val(raw.kind, val)
 

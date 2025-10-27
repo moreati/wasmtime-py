@@ -1,5 +1,4 @@
 from . import _ffi as ffi
-from ctypes import *
 import ctypes
 from wasmtime import Engine, wat2wasm, ImportType, ExportType, WasmtimeError, Managed
 import typing
@@ -38,9 +37,9 @@ class Module(Managed["ctypes._Pointer[ffi.wasmtime_module_t]"]):
 
         # TODO: can the copy be avoided here? I can't for the life of me
         # figure this out.
-        binary = (c_uint8 * len(wasm)).from_buffer_copy(wasm)
-        ptr = POINTER(ffi.wasmtime_module_t)()
-        error = ffi.wasmtime_module_new(engine.ptr(), binary, len(wasm), byref(ptr))
+        binary = (ctypes.c_uint8 * len(wasm)).from_buffer_copy(wasm)
+        ptr = ctypes.POINTER(ffi.wasmtime_module_t)()
+        error = ffi.wasmtime_module_new(engine.ptr(), binary, len(wasm), ctypes.byref(ptr))
         if error:
             raise WasmtimeError._from_ptr(error)
         self._set_ptr(ptr)
@@ -50,7 +49,7 @@ class Module(Managed["ctypes._Pointer[ffi.wasmtime_module_t]"]):
 
     @classmethod
     def _from_ptr(cls, ptr: "ctypes._Pointer[ffi.wasmtime_module_t]") -> "Module":
-        if not isinstance(ptr, POINTER(ffi.wasmtime_module_t)):
+        if not isinstance(ptr, ctypes.POINTER(ffi.wasmtime_module_t)):
             raise TypeError("wrong pointer type")
         ty: "Module" = cls.__new__(cls)
         ty._set_ptr(ptr)
@@ -70,15 +69,15 @@ class Module(Managed["ctypes._Pointer[ffi.wasmtime_module_t]"]):
         if not isinstance(encoded, (bytes, bytearray)):
             raise TypeError("expected bytes")
 
-        ptr = POINTER(ffi.wasmtime_module_t)()
+        ptr = ctypes.POINTER(ffi.wasmtime_module_t)()
 
         # TODO: can the copy be avoided here? I can't for the life of me
         # figure this out.
         error = ffi.wasmtime_module_deserialize(
             engine.ptr(),
-            (c_uint8 * len(encoded)).from_buffer_copy(encoded),
+            (ctypes.c_uint8 * len(encoded)).from_buffer_copy(encoded),
             len(encoded),
-            byref(ptr))
+            ctypes.byref(ptr))
         if error:
             raise WasmtimeError._from_ptr(error)
         ret: "Module" = cls.__new__(cls)
@@ -94,12 +93,12 @@ class Module(Managed["ctypes._Pointer[ffi.wasmtime_module_t]"]):
         Otherwise this function is the same as `Module.deserialize`.
         """
 
-        ptr = POINTER(ffi.wasmtime_module_t)()
+        ptr = ctypes.POINTER(ffi.wasmtime_module_t)()
         path_bytes = path.encode('utf-8')
         error = ffi.wasmtime_module_deserialize_file(
             engine.ptr(),
             path_bytes,
-            byref(ptr))
+            ctypes.byref(ptr))
         if error:
             raise WasmtimeError._from_ptr(error)
         ret: "Module" = cls.__new__(cls)
@@ -120,7 +119,7 @@ class Module(Managed["ctypes._Pointer[ffi.wasmtime_module_t]"]):
 
         # TODO: can the copy be avoided here? I can't for the life of me
         # figure this out.
-        buf = (c_uint8 * len(wasm)).from_buffer_copy(wasm)
+        buf = (ctypes.c_uint8 * len(wasm)).from_buffer_copy(wasm)
         error = ffi.wasmtime_module_validate(engine.ptr(), buf, len(wasm))
 
         if error:
@@ -142,7 +141,7 @@ class Module(Managed["ctypes._Pointer[ffi.wasmtime_module_t]"]):
         """
 
         imports = ImportTypeList()
-        ffi.wasmtime_module_imports(self.ptr(), byref(imports.vec))
+        ffi.wasmtime_module_imports(self.ptr(), ctypes.byref(imports.vec))
         ret = []
         for i in range(0, imports.vec.size):
             ret.append(ImportType._from_ptr(imports.vec.data[i], imports))
@@ -155,7 +154,7 @@ class Module(Managed["ctypes._Pointer[ffi.wasmtime_module_t]"]):
         """
 
         exports = ExportTypeList()
-        ffi.wasmtime_module_exports(self.ptr(), byref(exports.vec))
+        ffi.wasmtime_module_exports(self.ptr(), ctypes.byref(exports.vec))
         ret = []
         for i in range(0, exports.vec.size):
             ret.append(ExportType._from_ptr(exports.vec.data[i], exports))
@@ -170,11 +169,11 @@ class Module(Managed["ctypes._Pointer[ffi.wasmtime_module_t]"]):
         module.
         """
         raw = ffi.wasm_byte_vec_t()
-        err = ffi.wasmtime_module_serialize(self.ptr(), byref(raw))
+        err = ffi.wasmtime_module_serialize(self.ptr(), ctypes.byref(raw))
         if err:
             raise WasmtimeError._from_ptr(err)
         ret = ffi.to_bytes(raw)
-        ffi.wasm_byte_vec_delete(byref(raw))
+        ffi.wasm_byte_vec_delete(ctypes.byref(raw))
         return ret
 
     def _as_extern(self) -> ffi.wasmtime_extern_t:
@@ -187,7 +186,7 @@ class ImportTypeList:
         self.vec = ffi.wasm_importtype_vec_t(0, None)
 
     def __del__(self) -> None:
-        ffi.wasm_importtype_vec_delete(byref(self.vec))
+        ffi.wasm_importtype_vec_delete(ctypes.byref(self.vec))
 
 
 class ExportTypeList:
@@ -195,4 +194,4 @@ class ExportTypeList:
         self.vec = ffi.wasm_exporttype_vec_t(0, None)
 
     def __del__(self) -> None:
-        ffi.wasm_exporttype_vec_delete(byref(self.vec))
+        ffi.wasm_exporttype_vec_delete(ctypes.byref(self.vec))
