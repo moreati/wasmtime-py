@@ -1,5 +1,6 @@
 import ctypes
 
+from . import _bindings
 from . import _ffi as ffi
 from wasmtime import WasmtimeError
 import typing
@@ -27,10 +28,10 @@ def wat2wasm(wat: typing.Union[str, bytes]) -> bytearray:
         wat = wat.encode('utf8')
     wat_buffer = ctypes.create_string_buffer(wat)
     wasm = ffi.wasm_byte_vec_t()
-    error = ffi.wasmtime_wat2wasm(wat_buffer, len(wat), ctypes.byref(wasm))
+    error = _bindings.wasmtime_wat2wasm(wat_buffer, len(wat), ctypes.byref(wasm))
     if error:
         raise WasmtimeError._from_ptr(error)
     else:
         ret = ffi.to_bytes(wasm)
-        ffi.wasm_byte_vec_delete(ctypes.byref(wasm))
+        _bindings.wasm_byte_vec_delete(ctypes.byref(wasm))
         return ret

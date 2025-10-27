@@ -92,7 +92,7 @@ class wasm_val_t(ctypes.Structure):
     of: wasm_val_union
 
 
-from ._bindings import *  # noqa
+from ._bindings import wasm_byte_vec_t  # noqa
 
 
 def to_bytes(vec: wasm_byte_vec_t) -> bytearray:

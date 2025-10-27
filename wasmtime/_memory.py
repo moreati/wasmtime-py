@@ -2,25 +2,26 @@ from . import _ffi as ffi
 import ctypes
 import typing
 from wasmtime import MemoryType, WasmtimeError
+from . import _bindings
 from ._store import Storelike
 
 
 class Memory:
-    _memory: ffi.wasmtime_memory_t
+    _memory: _bindings.wasmtime_memory_t
 
     def __init__(self, store: Storelike, ty: MemoryType):
         """
         Creates a new memory in `store` with the given `ty`
         """
 
-        mem = ffi.wasmtime_memory_t()
-        error = ffi.wasmtime_memory_new(store._context(), ty.ptr(), ctypes.byref(mem))
+        mem = _bindings.wasmtime_memory_t()
+        error = _bindings.wasmtime_memory_new(store._context(), ty.ptr(), ctypes.byref(mem))
         if error:
             raise WasmtimeError._from_ptr(error)
         self._memory = mem
 
     @classmethod
-    def _from_raw(cls, mem: ffi.wasmtime_memory_t) -> "Memory":
+    def _from_raw(cls, mem: _bindings.wasmtime_memory_t) -> "Memory":
         ty: "Memory" = cls.__new__(cls)
         ty._memory = mem
         return ty
@@ -30,7 +31,7 @@ class Memory:
         Gets the type of this memory as a `MemoryType`
         """
 
-        ptr = ffi.wasmtime_memory_type(store._context(), ctypes.byref(self._memory))
+        ptr = _bindings.wasmtime_memory_type(store._context(), ctypes.byref(self._memory))
         return MemoryType._from_ptr(ptr, None)
 
     def grow(self, store: Storelike, delta: int) -> int:
@@ -41,7 +42,7 @@ class Memory:
         if delta < 0:
             raise WasmtimeError("cannot grow by negative amount")
         prev = ctypes.c_uint64(0)
-        error = ffi.wasmtime_memory_grow(store._context(), ctypes.byref(self._memory), delta, ctypes.byref(prev))
+        error = _bindings.wasmtime_memory_grow(store._context(), ctypes.byref(self._memory), delta, ctypes.byref(prev))
         if error:
             raise WasmtimeError._from_ptr(error)
         return prev.value
@@ -51,7 +52,7 @@ class Memory:
         Returns the size, in WebAssembly pages, of this memory.
         """
 
-        return ffi.wasmtime_memory_size(store._context(), ctypes.byref(self._memory))
+        return _bindings.wasmtime_memory_size(store._context(), ctypes.byref(self._memory))
 
     def data_ptr(self, store: Storelike) -> "ctypes._Pointer[ctypes.c_ubyte]":
         """
@@ -60,7 +61,7 @@ class Memory:
         Remember that all accesses to wasm memory should be bounds-checked
         against the `data_len` method.
         """
-        return ffi.wasmtime_memory_data(store._context(), ctypes.byref(self._memory))
+        return _bindings.wasmtime_memory_data(store._context(), ctypes.byref(self._memory))
 
     def get_buffer_ptr(self, store: Storelike,
                        size: typing.Optional[int] = None,
@@ -139,8 +140,8 @@ class Memory:
         Returns the raw byte length of this memory.
         """
 
-        return ffi.wasmtime_memory_data_size(store._context(), ctypes.byref(self._memory))
+        return _bindings.wasmtime_memory_data_size(store._context(), ctypes.byref(self._memory))
 
-    def _as_extern(self) -> ffi.wasmtime_extern_t:
-        union = ffi.wasmtime_extern_union(memory=self._memory)
-        return ffi.wasmtime_extern_t(ffi.WASMTIME_EXTERN_MEMORY, union)
+    def _as_extern(self) -> _bindings.wasmtime_extern_t:
+        union = _bindings.wasmtime_extern_union(memory=self._memory)
+        return _bindings.wasmtime_extern_t(ffi.WASMTIME_EXTERN_MEMORY, union)

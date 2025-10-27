@@ -1,5 +1,6 @@
 import ctypes
 
+from . import _bindings
 from . import _ffi as ffi
 from wasmtime import TableType, Store, WasmtimeError, Val
 from typing import Optional, Any
@@ -7,7 +8,7 @@ from ._store import Storelike
 
 
 class Table:
-    _table: ffi.wasmtime_table_t
+    _table: _bindings.wasmtime_table_t
 
     def __init__(self, store: Store, ty: TableType, init: Any):
         """
@@ -16,15 +17,15 @@ class Table:
 
         init_val = Val._convert_to_raw(store, ty.element, init)
 
-        table = ffi.wasmtime_table_t()
-        error = ffi.wasmtime_table_new(store._context(), ty.ptr(), ctypes.byref(init_val), ctypes.byref(table))
-        ffi.wasmtime_val_unroot(ctypes.byref(init_val))
+        table = _bindings.wasmtime_table_t()
+        error = _bindings.wasmtime_table_new(store._context(), ty.ptr(), ctypes.byref(init_val), ctypes.byref(table))
+        _bindings.wasmtime_val_unroot(ctypes.byref(init_val))
         if error:
             raise WasmtimeError._from_ptr(error)
         self._table = table
 
     @classmethod
-    def _from_raw(cls, table: ffi.wasmtime_table_t) -> "Table":
+    def _from_raw(cls, table: _bindings.wasmtime_table_t) -> "Table":
         ty: "Table" = cls.__new__(cls)
         ty._table = table
         return ty
@@ -34,14 +35,14 @@ class Table:
         Gets the type of this table as a `TableType`
         """
 
-        ptr = ffi.wasmtime_table_type(store._context(), ctypes.byref(self._table))
+        ptr = _bindings.wasmtime_table_type(store._context(), ctypes.byref(self._table))
         return TableType._from_ptr(ptr, None)
 
     def size(self, store: Storelike) -> int:
         """
         Gets the size, in elements, of this table
         """
-        return ffi.wasmtime_table_size(store._context(), ctypes.byref(self._table))
+        return _bindings.wasmtime_table_size(store._context(), ctypes.byref(self._table))
 
     def grow(self, store: Storelike, amt: int, init: Any) -> int:
         """
@@ -53,14 +54,14 @@ class Table:
         """
         init_val = Val._convert_to_raw(store, self.type(store).element, init)
         prev = ctypes.c_uint64(0)
-        error = ffi.wasmtime_table_grow(
+        error = _bindings.wasmtime_table_grow(
             store._context(),
             ctypes.byref(self._table),
             ctypes.c_uint64(amt),
             ctypes.byref(init_val),
             ctypes.byref(prev),
         )
-        ffi.wasmtime_val_unroot(ctypes.byref(init_val))
+        _bindings.wasmtime_val_unroot(ctypes.byref(init_val))
         if error:
             raise WasmtimeError._from_ptr(error)
         return prev.value
@@ -78,8 +79,8 @@ class Table:
 
         Returns `None` if `idx` is out of bounds.
         """
-        raw = ffi.wasmtime_val_t()
-        ok = ffi.wasmtime_table_get(store._context(), ctypes.byref(self._table), idx, ctypes.byref(raw))
+        raw = _bindings.wasmtime_val_t()
+        ok = _bindings.wasmtime_table_get(store._context(), ctypes.byref(self._table), idx, ctypes.byref(raw))
         if not ok:
             return None
         val = Val._from_raw(store, raw)
@@ -102,11 +103,11 @@ class Table:
         Raises a `WasmtimeError` if `idx` is out of bounds.
         """
         value = Val._convert_to_raw(store, self.type(store).element, val)
-        error = ffi.wasmtime_table_set(store._context(), ctypes.byref(self._table), idx, ctypes.byref(value))
-        ffi.wasmtime_val_unroot(ctypes.byref(value))
+        error = _bindings.wasmtime_table_set(store._context(), ctypes.byref(self._table), idx, ctypes.byref(value))
+        _bindings.wasmtime_val_unroot(ctypes.byref(value))
         if error:
             raise WasmtimeError._from_ptr(error)
 
-    def _as_extern(self) -> ffi.wasmtime_extern_t:
-        union = ffi.wasmtime_extern_union(table=self._table)
-        return ffi.wasmtime_extern_t(ffi.WASMTIME_EXTERN_TABLE, union)
+    def _as_extern(self) -> _bindings.wasmtime_extern_t:
+        union = _bindings.wasmtime_extern_union(table=self._table)
+        return _bindings.wasmtime_extern_t(ffi.WASMTIME_EXTERN_TABLE, union)

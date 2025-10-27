@@ -4,8 +4,10 @@ from wasmtime import Engine, wat2wasm, ImportType, ExportType, WasmtimeError, Ma
 import typing
 from os import PathLike
 
+from . import _bindings
 
-class Module(Managed["ctypes._Pointer[ffi.wasmtime_module_t]"]):
+
+class Module(Managed["ctypes._Pointer[_bindings.wasmtime_module_t]"]):
 
     @classmethod
     def from_file(cls, engine: Engine, path: typing.Union[str, bytes, PathLike]) -> "Module":
@@ -38,18 +40,18 @@ class Module(Managed["ctypes._Pointer[ffi.wasmtime_module_t]"]):
         # TODO: can the copy be avoided here? I can't for the life of me
         # figure this out.
         binary = (ctypes.c_uint8 * len(wasm)).from_buffer_copy(wasm)
-        ptr = ctypes.POINTER(ffi.wasmtime_module_t)()
-        error = ffi.wasmtime_module_new(engine.ptr(), binary, len(wasm), ctypes.byref(ptr))
+        ptr = ctypes.POINTER(_bindings.wasmtime_module_t)()
+        error = _bindings.wasmtime_module_new(engine.ptr(), binary, len(wasm), ctypes.byref(ptr))
         if error:
             raise WasmtimeError._from_ptr(error)
         self._set_ptr(ptr)
 
-    def _delete(self, ptr: "ctypes._Pointer[ffi.wasmtime_module_t]") -> None:
-        ffi.wasmtime_module_delete(ptr)
+    def _delete(self, ptr: "ctypes._Pointer[_bindings.wasmtime_module_t]") -> None:
+        _bindings.wasmtime_module_delete(ptr)
 
     @classmethod
-    def _from_ptr(cls, ptr: "ctypes._Pointer[ffi.wasmtime_module_t]") -> "Module":
-        if not isinstance(ptr, ctypes.POINTER(ffi.wasmtime_module_t)):
+    def _from_ptr(cls, ptr: "ctypes._Pointer[_bindings.wasmtime_module_t]") -> "Module":
+        if not isinstance(ptr, ctypes.POINTER(_bindings.wasmtime_module_t)):
             raise TypeError("wrong pointer type")
         ty: "Module" = cls.__new__(cls)
         ty._set_ptr(ptr)
@@ -69,11 +71,11 @@ class Module(Managed["ctypes._Pointer[ffi.wasmtime_module_t]"]):
         if not isinstance(encoded, (bytes, bytearray)):
             raise TypeError("expected bytes")
 
-        ptr = ctypes.POINTER(ffi.wasmtime_module_t)()
+        ptr = ctypes.POINTER(_bindings.wasmtime_module_t)()
 
         # TODO: can the copy be avoided here? I can't for the life of me
         # figure this out.
-        error = ffi.wasmtime_module_deserialize(
+        error = _bindings.wasmtime_module_deserialize(
             engine.ptr(),
             (ctypes.c_uint8 * len(encoded)).from_buffer_copy(encoded),
             len(encoded),
@@ -93,9 +95,9 @@ class Module(Managed["ctypes._Pointer[ffi.wasmtime_module_t]"]):
         Otherwise this function is the same as `Module.deserialize`.
         """
 
-        ptr = ctypes.POINTER(ffi.wasmtime_module_t)()
+        ptr = ctypes.POINTER(_bindings.wasmtime_module_t)()
         path_bytes = path.encode('utf-8')
-        error = ffi.wasmtime_module_deserialize_file(
+        error = _bindings.wasmtime_module_deserialize_file(
             engine.ptr(),
             path_bytes,
             ctypes.byref(ptr))
@@ -120,7 +122,7 @@ class Module(Managed["ctypes._Pointer[ffi.wasmtime_module_t]"]):
         # TODO: can the copy be avoided here? I can't for the life of me
         # figure this out.
         buf = (ctypes.c_uint8 * len(wasm)).from_buffer_copy(wasm)
-        error = ffi.wasmtime_module_validate(engine.ptr(), buf, len(wasm))
+        error = _bindings.wasmtime_module_validate(engine.ptr(), buf, len(wasm))
 
         if error:
             raise WasmtimeError._from_ptr(error)
@@ -141,7 +143,7 @@ class Module(Managed["ctypes._Pointer[ffi.wasmtime_module_t]"]):
         """
 
         imports = ImportTypeList()
-        ffi.wasmtime_module_imports(self.ptr(), ctypes.byref(imports.vec))
+        _bindings.wasmtime_module_imports(self.ptr(), ctypes.byref(imports.vec))
         ret = []
         for i in range(0, imports.vec.size):
             ret.append(ImportType._from_ptr(imports.vec.data[i], imports))
@@ -154,7 +156,7 @@ class Module(Managed["ctypes._Pointer[ffi.wasmtime_module_t]"]):
         """
 
         exports = ExportTypeList()
-        ffi.wasmtime_module_exports(self.ptr(), ctypes.byref(exports.vec))
+        _bindings.wasmtime_module_exports(self.ptr(), ctypes.byref(exports.vec))
         ret = []
         for i in range(0, exports.vec.size):
             ret.append(ExportType._from_ptr(exports.vec.data[i], exports))
@@ -169,29 +171,29 @@ class Module(Managed["ctypes._Pointer[ffi.wasmtime_module_t]"]):
         module.
         """
         raw = ffi.wasm_byte_vec_t()
-        err = ffi.wasmtime_module_serialize(self.ptr(), ctypes.byref(raw))
+        err = _bindings.wasmtime_module_serialize(self.ptr(), ctypes.byref(raw))
         if err:
             raise WasmtimeError._from_ptr(err)
         ret = ffi.to_bytes(raw)
-        ffi.wasm_byte_vec_delete(ctypes.byref(raw))
+        _bindings.wasm_byte_vec_delete(ctypes.byref(raw))
         return ret
 
-    def _as_extern(self) -> ffi.wasmtime_extern_t:
-        union = ffi.wasmtime_extern_union(module=self.ptr())
-        return ffi.wasmtime_extern_t(ffi.WASMTIME_EXTERN_MODULE, union)
+    def _as_extern(self) -> _bindings.wasmtime_extern_t:
+        union = _bindings.wasmtime_extern_union(module=self.ptr())
+        return _bindings.wasmtime_extern_t(ffi.WASMTIME_EXTERN_MODULE, union)
 
 
 class ImportTypeList:
     def __init__(self) -> None:
-        self.vec = ffi.wasm_importtype_vec_t(0, None)
+        self.vec = _bindings.wasm_importtype_vec_t(0, None)
 
     def __del__(self) -> None:
-        ffi.wasm_importtype_vec_delete(ctypes.byref(self.vec))
+        _bindings.wasm_importtype_vec_delete(ctypes.byref(self.vec))
 
 
 class ExportTypeList:
     def __init__(self) -> None:
-        self.vec = ffi.wasm_exporttype_vec_t(0, None)
+        self.vec = _bindings.wasm_exporttype_vec_t(0, None)
 
     def __del__(self) -> None:
-        ffi.wasm_exporttype_vec_delete(ctypes.byref(self.vec))
+        _bindings.wasm_exporttype_vec_delete(ctypes.byref(self.vec))
