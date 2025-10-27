@@ -43,7 +43,8 @@ class Store(Managed["ctypes._Pointer[_bindings.wasmtime_store_t]"]):
         """
         data = _bindings.wasmtime_context_get_data(self._context())
         if data:
-            return value._unintern(data)
+            # TODO https://github.com/bytecodealliance/wasmtime-py/issues/303
+            return value._unintern(data)  # type: ignore
         else:
             return None
 
