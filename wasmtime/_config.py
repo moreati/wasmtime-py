@@ -24,8 +24,8 @@ class Config(Managed["ctypes._Pointer[ffi.wasm_config_t]"]):
     def __init__(self) -> None:
         self._set_ptr(ffi.wasm_config_new())
 
-    def _delete(self, ptr: "ctypes._Pointer[ffi.wasm_config_t]") -> None:
-        ffi.wasm_config_delete(ptr)
+    def _delete(self, ptr: "ctypes._Pointer[ffi.wasm_config_t]", wasm_config_delete=ffi.wasm_config_delete) -> None:
+        wasm_config_delete(ptr)
 
     @setter_property
     def debug_info(self, enable: bool) -> None:

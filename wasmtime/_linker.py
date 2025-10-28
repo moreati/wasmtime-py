@@ -23,8 +23,8 @@ class Linker(Managed["ctypes._Pointer[ffi.wasmtime_linker_t]"]):
         self._set_ptr(ffi.wasmtime_linker_new(engine.ptr()))
         self.engine = engine
 
-    def _delete(self, ptr: "ctypes._Pointer[ffi.wasmtime_linker_t]") -> None:
-        ffi.wasmtime_linker_delete(ptr)
+    def _delete(self, ptr: "ctypes._Pointer[ffi.wasmtime_linker_t]", wasmtime_linker_delete=ffi.wasmtime_linker_delete) -> None:
+        wasmtime_linker_delete(ptr)
 
     @setter_property
     def allow_shadowing(self, allow: bool) -> None:

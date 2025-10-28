@@ -41,8 +41,8 @@ class Trap(Exception, Managed["ctypes._Pointer[ffi.wasm_trap_t]"]):
         vec = message.encode('utf-8')
         self._set_ptr(ffi.wasmtime_trap_new(ffi.create_string_buffer(vec), len(vec)))
 
-    def _delete(self, ptr: "ctypes._Pointer[ffi.wasm_trap_t]") -> None:
-        ffi.wasm_trap_delete(ptr)
+    def _delete(self, ptr: "ctypes._Pointer[ffi.wasm_trap_t]", wasm_trap_delete=ffi.wasm_trap_delete) -> None:
+        wasm_trap_delete(ptr)
 
     @classmethod
     def _from_ptr(cls, ptr: "ctypes._Pointer[ffi.wasm_trap_t]") -> "Trap":
@@ -106,9 +106,9 @@ class Frame(Managed["ctypes._Pointer[ffi.wasm_frame_t]"]):
         ty._owner = owner
         return ty
 
-    def _delete(self, ptr: "ctypes._Pointer[ffi.wasm_frame_t]") -> None:
+    def _delete(self, ptr: "ctypes._Pointer[ffi.wasm_frame_t]", wasm_frame_delete=ffi.wasm_frame_delete) -> None:
         if self._owner is None:
-            ffi.wasm_frame_delete(ptr)
+            wasm_frame_delete(ptr)
 
     @property
     def func_index(self) -> int:

@@ -34,8 +34,8 @@ class WasiConfig(Managed["ctypes._Pointer[ffi.wasi_config_t]"]):
     def __init__(self) -> None:
         self._set_ptr(ffi.wasi_config_new())
 
-    def _delete(self, ptr: "ctypes._Pointer[ffi.wasi_config_t]") -> None:
-        ffi.wasi_config_delete(ptr)
+    def _delete(self, ptr: "ctypes._Pointer[ffi.wasi_config_t]", wasi_config_delete=ffi.wasi_config_delete) -> None:
+        wasi_config_delete(ptr)
 
     @setter_property
     def argv(self, argv: List[str]) -> None:

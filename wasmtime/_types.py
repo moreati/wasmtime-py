@@ -10,11 +10,11 @@ from . import _ffi as ffi
 class ValType(Managed["ctypes._Pointer[ffi.wasm_valtype_t]"]):
     _owner: Optional[Any]
 
-    def _delete(self, ptr: "ctypes._Pointer[ffi.wasm_valtype_t]") -> None:
+    def _delete(self, ptr: "ctypes._Pointer[ffi.wasm_valtype_t]", wasm_valtype_delete=ffi.wasm_valtype_delete) -> None:
         # If this is owned by another object we don't free it since that object
         # is responsible for freeing the backing memory.
         if self._owner is None:
-            ffi.wasm_valtype_delete(ptr)
+            wasm_valtype_delete(ptr)
 
     @classmethod
     def i32(cls) -> "ValType":
@@ -132,9 +132,9 @@ class FuncType(Managed["ctypes._Pointer[ffi.wasm_functype_t]"]):
         self._set_ptr(ptr)
         self._owner = None
 
-    def _delete(self, ptr: "ctypes._Pointer[ffi.wasm_functype_t]") -> None:
+    def _delete(self, ptr: "ctypes._Pointer[ffi.wasm_functype_t]", wasm_functype_delete=ffi.wasm_functype_delete) -> None:
         if self._owner is None:
-            ffi.wasm_functype_delete(ptr)
+            wasm_functype_delete(ptr)
 
     @classmethod
     def _from_ptr(cls, ptr: "ctypes._Pointer[ffi.wasm_functype_t]", owner: Optional[Any]) -> "FuncType":
@@ -180,9 +180,9 @@ class GlobalType(Managed["ctypes._Pointer[ffi.wasm_globaltype_t]"]):
         self._set_ptr(ptr)
         self._owner = None
 
-    def _delete(self, ptr: "ctypes._Pointer[ffi.wasm_globaltype_t]") -> None:
+    def _delete(self, ptr: "ctypes._Pointer[ffi.wasm_globaltype_t]", wasm_globaltype_delete=ffi.wasm_globaltype_delete) -> None:
         if self._owner is None:
-            ffi.wasm_globaltype_delete(ptr)
+            wasm_globaltype_delete(ptr)
 
     @classmethod
     def _from_ptr(cls, ptr: "ctypes._Pointer[ffi.wasm_globaltype_t]", owner: Optional[Any]) -> "GlobalType":
@@ -250,9 +250,9 @@ class TableType(Managed["ctypes._Pointer[ffi.wasm_tabletype_t]"]):
         self._set_ptr(ptr)
         self._owner = None
 
-    def _delete(self, ptr: "ctypes._Pointer[ffi.wasm_tabletype_t]") -> None:
+    def _delete(self, ptr: "ctypes._Pointer[ffi.wasm_tabletype_t]", wasm_tabletype_delete=ffi.wasm_tabletype_delete) -> None:
         if self._owner is None:
-            ffi.wasm_tabletype_delete(ptr)
+            wasm_tabletype_delete(ptr)
 
     @classmethod
     def _from_ptr(cls, ptr: 'ctypes._Pointer[ffi.wasm_tabletype_t]', owner: Optional[Any]) -> "TableType":
@@ -305,9 +305,9 @@ class MemoryType(Managed["ctypes._Pointer[ffi.wasm_memorytype_t]"]):
         self._set_ptr(ptr)
         self._owner = None
 
-    def _delete(self, ptr: "ctypes._Pointer[ffi.wasm_memorytype_t]") -> None:
+    def _delete(self, ptr: "ctypes._Pointer[ffi.wasm_memorytype_t]", wasm_memorytype_delete=ffi.wasm_memorytype_delete) -> None:
         if self._owner is None:
-            ffi.wasm_memorytype_delete(ptr)
+            wasm_memorytype_delete(ptr)
 
     @classmethod
     def _from_ptr(cls, ptr: "ctypes._Pointer[ffi.wasm_memorytype_t]", owner: Optional[Any]) -> "MemoryType":
@@ -377,9 +377,9 @@ class ImportType(Managed["ctypes._Pointer[ffi.wasm_importtype_t]"]):
         ty._owner = owner
         return ty
 
-    def _delete(self, ptr: "ctypes._Pointer[ffi.wasm_importtype_t]") -> None:
+    def _delete(self, ptr: "ctypes._Pointer[ffi.wasm_importtype_t]", wasm_importtype_delete=ffi.wasm_importtype_delete) -> None:
         if self._owner is None:
-            ffi.wasm_importtype_delete(ptr)
+            wasm_importtype_delete(ptr)
 
     @property
     def module(self) -> str:
@@ -424,9 +424,9 @@ class ExportType(Managed["ctypes._Pointer[ffi.wasm_exporttype_t]"]):
         ty._owner = owner
         return ty
 
-    def _delete(self, ptr: "ctypes._Pointer[ffi.wasm_exporttype_t]") -> None:
+    def _delete(self, ptr: "ctypes._Pointer[ffi.wasm_exporttype_t]", wasm_exporttype_delete=ffi.wasm_exporttype_delete) -> None:
         if self._owner is None:
-            ffi.wasm_exporttype_delete(ptr)
+            wasm_exporttype_delete(ptr)
 
     @property
     def name(self) -> str:

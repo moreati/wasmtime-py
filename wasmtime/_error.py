@@ -11,8 +11,8 @@ class WasmtimeError(Exception, Managed["ctypes._Pointer[ffi.wasmtime_error_t]"])
     def __init__(self, message: str):
         self.__message = message
 
-    def _delete(self, ptr: "ctypes._Pointer[ffi.wasmtime_error_t]") -> None:
-        ffi.wasmtime_error_delete(ptr)
+    def _delete(self, ptr: "ctypes._Pointer[ffi.wasmtime_error_t]", wasmtime_error_delete=ffi.wasmtime_error_delete) -> None:
+        wasmtime_error_delete(ptr)
 
     @classmethod
     def _from_ptr(cls, ptr: "ctypes._Pointer") -> 'WasmtimeError':

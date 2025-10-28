@@ -45,8 +45,8 @@ class Module(Managed["ctypes._Pointer[ffi.wasmtime_module_t]"]):
             raise WasmtimeError._from_ptr(error)
         self._set_ptr(ptr)
 
-    def _delete(self, ptr: "ctypes._Pointer[ffi.wasmtime_module_t]") -> None:
-        ffi.wasmtime_module_delete(ptr)
+    def _delete(self, ptr: "ctypes._Pointer[ffi.wasmtime_module_t]", wasmtime_module_delete=ffi.wasmtime_module_delete) -> None:
+        wasmtime_module_delete(ptr)
 
     @classmethod
     def _from_ptr(cls, ptr: "ctypes._Pointer[ffi.wasmtime_module_t]") -> "Module":

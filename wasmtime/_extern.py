@@ -49,5 +49,5 @@ class Extern(Managed["ctypes._Pointer[ffi.wasm_extern_t]"]):
     def __init__(self, ptr: "ctypes._Pointer[ffi.wasm_extern_t]"):
         self._set_ptr(ptr)
 
-    def _delete(self, ptr: "ctypes._Pointer[ffi.wasm_extern_t]") -> None:
-        ffi.wasm_extern_delete(ptr)
+    def _delete(self, ptr: "ctypes._Pointer[ffi.wasm_extern_t]", wasm_extern_delete=ffi.wasm_extern_delete) -> None:
+        wasm_extern_delete(ptr)

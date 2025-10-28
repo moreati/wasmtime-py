@@ -19,8 +19,8 @@ class SharedMemory(Managed["ctypes._Pointer[ffi.wasmtime_sharedmemory_t]"]):
             raise WasmtimeError._from_ptr(error)
         self._set_ptr(sharedmemory_ptr)
 
-    def _delete(self, ptr: "ctypes._Pointer[ffi.wasmtime_sharedmemory_t]") -> None:
-        ffi.wasmtime_sharedmemory_delete(ptr)
+    def _delete(self, ptr: "ctypes._Pointer[ffi.wasmtime_sharedmemory_t]", wasmtime_sharedmemory_delete=ffi.wasmtime_sharedmemory_delete) -> None:
+        wasmtime_sharedmemory_delete(ptr)
 
     @classmethod
     def _from_ptr(cls, ptr: "ctypes._Pointer[ffi.wasmtime_sharedmemory_t]") -> "SharedMemory":

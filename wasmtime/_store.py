@@ -27,8 +27,8 @@ class Store(Managed["ctypes._Pointer[ffi.wasmtime_store_t]"]):
         self.__context = ffi.wasmtime_store_context(self.ptr())
         self.engine = engine
 
-    def _delete(self, ptr: "ctypes._Pointer[ffi.wasmtime_store_t]") -> None:
-        ffi.wasmtime_store_delete(ptr)
+    def _delete(self, ptr: "ctypes._Pointer[ffi.wasmtime_store_t]", wasmtime_store_delete=ffi.wasmtime_store_delete) -> None:
+        wasmtime_store_delete(ptr)
         self.__context = None
 
     def _context(self) -> "ctypes._Pointer[ffi.wasmtime_context_t]":
