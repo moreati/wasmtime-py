@@ -186,13 +186,13 @@ class ImportTypeList:
     def __init__(self) -> None:
         self.vec = ffi.wasm_importtype_vec_t(0, None)
 
-    def __del__(self) -> None:
-        ffi.wasm_importtype_vec_delete(byref(self.vec))
+    def __del__(self, wasm_importtype_vec_delete=ffi.wasm_importtype_vec_delete, byref=ctypes.byref) -> None:
+        wasm_importtype_vec_delete(byref(self.vec))
 
 
 class ExportTypeList:
     def __init__(self) -> None:
         self.vec = ffi.wasm_exporttype_vec_t(0, None)
 
-    def __del__(self) -> None:
-        ffi.wasm_exporttype_vec_delete(byref(self.vec))
+    def __del__(self, wasm_exporttype_vec_delete=ffi.wasm_exporttype_vec_delete, byref=ctypes.byref) -> None:
+        wasm_exporttype_vec_delete(byref(self.vec))

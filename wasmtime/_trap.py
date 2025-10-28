@@ -172,5 +172,5 @@ class FrameList:
         self.vec = ffi.wasm_frame_vec_t(0, None)
         self.owner = owner
 
-    def __del__(self) -> None:
-        ffi.wasm_frame_vec_delete(byref(self.vec))
+    def __del__(self, wasm_frame_vec_delete=ffi.wasm_frame_vec_delete, byref=ctypes.byref) -> None:
+        wasm_frame_vec_delete(byref(self.vec))
