@@ -6,6 +6,8 @@ from wasmtime import Engine, wat2wasm, WasmtimeError, Managed, Module
 import typing
 from os import PathLike
 
+from .._ffi import _util as ffi_util
+
 
 class ExportIndex(Managed["ctypes._Pointer[ffi.wasmtime_component_export_index_t]"]):
 
@@ -121,7 +123,7 @@ class Component(Managed["ctypes._Pointer[ffi.wasmtime_component_t]"]):
         err = ffi.wasmtime_component_serialize(self.ptr(), ctypes.byref(raw))
         if err:
             raise WasmtimeError._from_ptr(err)
-        ret = ffi.to_bytes(raw)
+        ret = ffi_util.to_bytes(raw)
         ffi.wasm_byte_vec_delete(ctypes.byref(raw))
         return ret
 

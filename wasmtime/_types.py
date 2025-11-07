@@ -5,6 +5,7 @@ from typing import Any, List, Optional, Union
 from wasmtime import Managed, WasmtimeError
 
 from . import _ffi as ffi
+from ._ffi import _util as ffi_util
 
 
 class ValType(Managed["ctypes._Pointer[ffi.wasm_valtype_t]"]):
@@ -391,7 +392,7 @@ class ImportType(Managed["ctypes._Pointer[ffi.wasm_importtype_t]"]):
         Returns the module this import type refers to
         """
 
-        return ffi.to_str(ffi.wasm_importtype_module(self.ptr()).contents)
+        return ffi_util.to_str(ffi.wasm_importtype_module(self.ptr()).contents)
 
     @property
     def name(self) -> Optional[str]:
@@ -403,7 +404,7 @@ class ImportType(Managed["ctypes._Pointer[ffi.wasm_importtype_t]"]):
         """
         ptr = ffi.wasm_importtype_name(self.ptr())
         if ptr:
-            return ffi.to_str(ptr.contents)
+            return ffi_util.to_str(ptr.contents)
         return None
 
     @property
@@ -437,7 +438,7 @@ class ExportType(Managed["ctypes._Pointer[ffi.wasm_exporttype_t]"]):
         """
         Returns the name in the modulethis export type refers to
         """
-        return ffi.to_str(ffi.wasm_exporttype_name(self.ptr()).contents)
+        return ffi_util.to_str(ffi.wasm_exporttype_name(self.ptr()).contents)
 
     @property
     def type(self) -> "AsExternType":

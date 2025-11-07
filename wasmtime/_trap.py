@@ -5,6 +5,8 @@ import ctypes
 from typing import Optional, Any, List
 from wasmtime import Managed
 
+from ._ffi import _util as ffi_util
+
 
 class TrapCode(Enum):
     # The current stack space was exhausted.
@@ -62,7 +64,7 @@ class Trap(Exception, Managed["ctypes._Pointer[ffi.wasm_trap_t]"]):
         ffi.wasm_trap_message(self.ptr(), byref(message))
         # subtract one to chop off the trailing nul byte
         message.size -= 1
-        ret = ffi.to_str(message)
+        ret = ffi_util.to_str(message)
         message.size += 1
         ffi.wasm_byte_vec_delete(byref(message))
         return ret
@@ -128,7 +130,7 @@ class Frame(Managed["ctypes._Pointer[ffi.wasm_frame_t]"]):
 
         ptr = ffi.wasmtime_frame_func_name(self.ptr())
         if ptr:
-            return ffi.to_str(ptr.contents)
+            return ffi_util.to_str(ptr.contents)
         else:
             return None
 
@@ -142,7 +144,7 @@ class Frame(Managed["ctypes._Pointer[ffi.wasm_frame_t]"]):
 
         ptr = ffi.wasmtime_frame_module_name(self.ptr())
         if ptr:
-            return ffi.to_str(ptr.contents)
+            return ffi_util.to_str(ptr.contents)
         else:
             return None
 

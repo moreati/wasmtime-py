@@ -4,6 +4,8 @@ import ctypes
 from typing import Optional
 from wasmtime import Managed
 
+from ._ffi import _util as ffi_util
+
 
 class WasmtimeError(Exception, Managed["ctypes._Pointer[ffi.wasmtime_error_t]"]):
     __message: Optional[str]
@@ -39,7 +41,7 @@ class WasmtimeError(Exception, Managed["ctypes._Pointer[ffi.wasmtime_error_t]"])
             return self.__message
         message_vec = ffi.wasm_byte_vec_t()
         ffi.wasmtime_error_message(self.ptr(), byref(message_vec))
-        message = ffi.to_str(message_vec)
+        message = ffi_util.to_str(message_vec)
         ffi.wasm_byte_vec_delete(byref(message_vec))
         return message
 

@@ -9,6 +9,8 @@ from typing import Sequence, Optional, Iterator, Mapping
 from ._store import Storelike
 from ._func import enter_wasm
 
+from ._ffi import _util as ffi_util
+
 
 class Instance:
     _instance: ffi.wasmtime_instance_t
@@ -83,7 +85,7 @@ class InstanceExports(Mapping[str, AsExtern]):
                 byref(name_ptr),
                 byref(name_len),
                 byref(item)):
-            name = ffi.to_str_raw(name_ptr, name_len.value)
+            name = ffi_util.to_str_raw(name_ptr, name_len.value)
             extern = wrap_extern(item)
             extern_list.append(extern)
             self._extern_map[name] = extern

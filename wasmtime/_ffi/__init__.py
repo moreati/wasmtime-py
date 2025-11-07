@@ -6,7 +6,94 @@
 import ctypes
 from typing import Any
 from enum import Enum, auto
-from ._ffi import dll, wasm_val_t, wasm_ref_t
+
+from ._lib import dll
+from ._types import wasm_ref_t, wasm_val_t
+
+WASM_I32 = ctypes.c_uint8(0)
+WASM_I64 = ctypes.c_uint8(1)
+WASM_F32 = ctypes.c_uint8(2)
+WASM_F64 = ctypes.c_uint8(3)
+WASM_ANYREF = ctypes.c_uint8(128)
+WASM_FUNCREF = ctypes.c_uint8(129)
+# WASM_V128 = ctypes.c_uint8(4)
+
+WASMTIME_I32 = ctypes.c_uint8(0)
+WASMTIME_I64 = ctypes.c_uint8(1)
+WASMTIME_F32 = ctypes.c_uint8(2)
+WASMTIME_F64 = ctypes.c_uint8(3)
+WASMTIME_V128 = ctypes.c_uint8(4)
+WASMTIME_FUNCREF = ctypes.c_uint8(5)
+WASMTIME_EXTERNREF = ctypes.c_uint8(6)
+
+WASM_CONST = ctypes.c_uint8(0)
+WASM_VAR = ctypes.c_uint8(1)
+
+WASMTIME_EXTERN_FUNC = ctypes.c_uint8(0)
+WASMTIME_EXTERN_GLOBAL = ctypes.c_uint8(1)
+WASMTIME_EXTERN_TABLE = ctypes.c_uint8(2)
+WASMTIME_EXTERN_MEMORY = ctypes.c_uint8(3)
+WASMTIME_EXTERN_SHAREDMEMORY = ctypes.c_uint8(4)
+
+WASMTIME_FUNCREF_NULL = (1 << 64) - 1
+
+WASMTIME_COMPONENT_ITEM_COMPONENT = ctypes.c_uint8(0)
+WASMTIME_COMPONENT_ITEM_COMPONENT_INSTANCE = ctypes.c_uint8(1)
+WASMTIME_COMPONENT_ITEM_MODULE = ctypes.c_uint8(2)
+WASMTIME_COMPONENT_ITEM_COMPONENT_FUNC = ctypes.c_uint8(3)
+WASMTIME_COMPONENT_ITEM_RESOURCE = ctypes.c_uint8(4)
+WASMTIME_COMPONENT_ITEM_CORE_FUNC = ctypes.c_uint8(5)
+WASMTIME_COMPONENT_ITEM_TYPE = ctypes.c_uint8(6)
+
+WASMTIME_COMPONENT_VALTYPE_BOOL = ctypes.c_uint8(0)
+WASMTIME_COMPONENT_VALTYPE_S8 = ctypes.c_uint8(1)
+WASMTIME_COMPONENT_VALTYPE_S16 = ctypes.c_uint8(2)
+WASMTIME_COMPONENT_VALTYPE_S32 = ctypes.c_uint8(3)
+WASMTIME_COMPONENT_VALTYPE_S64 = ctypes.c_uint8(4)
+WASMTIME_COMPONENT_VALTYPE_U8 = ctypes.c_uint8(5)
+WASMTIME_COMPONENT_VALTYPE_U16 = ctypes.c_uint8(6)
+WASMTIME_COMPONENT_VALTYPE_U32 = ctypes.c_uint8(7)
+WASMTIME_COMPONENT_VALTYPE_U64 = ctypes.c_uint8(8)
+WASMTIME_COMPONENT_VALTYPE_F32 = ctypes.c_uint8(9)
+WASMTIME_COMPONENT_VALTYPE_F64 = ctypes.c_uint8(10)
+WASMTIME_COMPONENT_VALTYPE_CHAR = ctypes.c_uint8(11)
+WASMTIME_COMPONENT_VALTYPE_STRING = ctypes.c_uint8(12)
+WASMTIME_COMPONENT_VALTYPE_LIST = ctypes.c_uint8(13)
+WASMTIME_COMPONENT_VALTYPE_RECORD = ctypes.c_uint8(14)
+WASMTIME_COMPONENT_VALTYPE_TUPLE = ctypes.c_uint8(15)
+WASMTIME_COMPONENT_VALTYPE_VARIANT = ctypes.c_uint8(16)
+WASMTIME_COMPONENT_VALTYPE_ENUM = ctypes.c_uint8(17)
+WASMTIME_COMPONENT_VALTYPE_OPTION = ctypes.c_uint8(18)
+WASMTIME_COMPONENT_VALTYPE_RESULT = ctypes.c_uint8(19)
+WASMTIME_COMPONENT_VALTYPE_FLAGS = ctypes.c_uint8(20)
+WASMTIME_COMPONENT_VALTYPE_OWN = ctypes.c_uint8(21)
+WASMTIME_COMPONENT_VALTYPE_BORROW = ctypes.c_uint8(22)
+WASMTIME_COMPONENT_VALTYPE_FUTURE = ctypes.c_uint8(23)
+WASMTIME_COMPONENT_VALTYPE_STREAM = ctypes.c_uint8(24)
+WASMTIME_COMPONENT_VALTYPE_ERROR_CONTEXT = ctypes.c_uint8(25)
+
+WASMTIME_COMPONENT_BOOL = ctypes.c_uint8(0)
+WASMTIME_COMPONENT_S8 = ctypes.c_uint8(1)
+WASMTIME_COMPONENT_U8 = ctypes.c_uint8(2)
+WASMTIME_COMPONENT_S16 = ctypes.c_uint8(3)
+WASMTIME_COMPONENT_U16 = ctypes.c_uint8(4)
+WASMTIME_COMPONENT_S32 = ctypes.c_uint8(5)
+WASMTIME_COMPONENT_U32 = ctypes.c_uint8(6)
+WASMTIME_COMPONENT_S64 = ctypes.c_uint8(7)
+WASMTIME_COMPONENT_U64 = ctypes.c_uint8(8)
+WASMTIME_COMPONENT_F32 = ctypes.c_uint8(9)
+WASMTIME_COMPONENT_F64 = ctypes.c_uint8(10)
+WASMTIME_COMPONENT_CHAR = ctypes.c_uint8(11)
+WASMTIME_COMPONENT_STRING = ctypes.c_uint8(12)
+WASMTIME_COMPONENT_LIST = ctypes.c_uint8(13)
+WASMTIME_COMPONENT_RECORD = ctypes.c_uint8(14)
+WASMTIME_COMPONENT_TUPLE = ctypes.c_uint8(15)
+WASMTIME_COMPONENT_VARIANT = ctypes.c_uint8(16)
+WASMTIME_COMPONENT_ENUM = ctypes.c_uint8(17)
+WASMTIME_COMPONENT_OPTION = ctypes.c_uint8(18)
+WASMTIME_COMPONENT_RESULT = ctypes.c_uint8(19)
+WASMTIME_COMPONENT_FLAGS = ctypes.c_uint8(20)
+WASMTIME_COMPONENT_RESOURCE = ctypes.c_uint8(21)
 
 wasm_byte_t = ctypes.c_ubyte
 

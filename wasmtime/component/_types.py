@@ -8,6 +8,8 @@ from ctypes import byref, POINTER
 from typing import Any, Optional, Dict, List, Union, Tuple, Set
 from wasmtime import Managed, Engine
 
+from .._ffi import _util as ffi_util
+
 
 class ComponentType(Managed["ctypes._Pointer[ffi.wasmtime_component_type_t]"]):
     def __init__(self) -> None:
@@ -425,11 +427,11 @@ class String(ValType):
         if not isinstance(val, str):
             raise TypeError("expected string type")
         ptr.contents.kind = ffi.WASMTIME_COMPONENT_STRING
-        ptr.contents.of.string = ffi.str_to_capi(val)
+        ptr.contents.of.string = ffi_util.str_to_capi(val)
 
     def convert_from_c(self, c: 'ffi.wasmtime_component_val_t') -> Any:
         assert(c.kind == ffi.WASMTIME_COMPONENT_STRING.value)
-        ret = ffi.to_str(c.of.string)
+        ret = ffi_util.to_str(c.of.string)
         ffi.wasm_byte_vec_delete(byref(c.of.string))
         return ret
 
@@ -577,7 +579,7 @@ class RecordType(Managed["ctypes._Pointer[ffi.wasmtime_component_record_type_t]"
         try:
             for name, ty in fields:
                 ty.convert_to_c(store, getattr(val, name), ctypes.pointer(raw.data[i].val))
-                raw.data[i].name = ffi.str_to_capi(name)
+                raw.data[i].name = ffi_util.str_to_capi(name)
                 i += 1
             ptr.contents.kind = ffi.WASMTIME_COMPONENT_RECORD
             ptr.contents.of.record = raw
@@ -597,7 +599,7 @@ class RecordType(Managed["ctypes._Pointer[ffi.wasmtime_component_record_type_t]"
             fields = self.fields
             for i, (name, ty) in zip(range(c.of.record.size), fields):
                 raw_field = c.of.record.data[i]
-                raw_name = ffi.to_str(raw_field.name)
+                raw_name = ffi_util.to_str(raw_field.name)
                 assert(raw_name == name)
                 val = ty.convert_from_c(raw_field.val)
                 setattr(ret, name, val)
@@ -826,12 +828,12 @@ class VariantType(Managed["ctypes._Pointer[ffi.wasmtime_component_variant_type_t
     def convert_to_c(self, store: Storelike, val: Any, ptr: 'ctypes._Pointer[ffi.wasmtime_component_val_t]') -> None:
         name, raw = self._lower(store, val)
         ptr.contents.kind = ffi.WASMTIME_COMPONENT_VARIANT
-        ptr.contents.of.variant.discriminant = ffi.str_to_capi(name)
+        ptr.contents.of.variant.discriminant = ffi_util.str_to_capi(name)
         ptr.contents.of.variant.val = raw
 
     def convert_from_c(self, c: 'ffi.wasmtime_component_val_t') -> Any:
         assert(c.kind == ffi.WASMTIME_COMPONENT_VARIANT.value)
-        tag = ffi.to_str(c.of.variant.discriminant)
+        tag = ffi_util.to_str(c.of.variant.discriminant)
         ffi.wasm_byte_vec_delete(byref(c.of.variant.discriminant))
         return self._lift(tag, c.of.variant.val)
 
@@ -892,13 +894,13 @@ class EnumType(Managed["ctypes._Pointer[ffi.wasmtime_component_enum_type_t]"], V
     def convert_to_c(self, store: Storelike, val: Any, ptr: 'ctypes._Pointer[ffi.wasmtime_component_val_t]') -> None:
         if isinstance(val, str):
             ptr.contents.kind = ffi.WASMTIME_COMPONENT_ENUM
-            ptr.contents.of.enumeration = ffi.str_to_capi(val)
+            ptr.contents.of.enumeration = ffi_util.str_to_capi(val)
         else:
             raise TypeError("expected str type")
 
     def convert_from_c(self, c: 'ffi.wasmtime_component_val_t') -> Any:
         assert(c.kind == ffi.WASMTIME_COMPONENT_ENUM.value)
-        ret = ffi.to_str(c.of.enumeration)
+        ret = ffi_util.to_str(c.of.enumeration)
         ffi.wasm_byte_vec_delete(byref(c.of.enumeration))
         return ret
 
@@ -1053,7 +1055,7 @@ class FlagsType(Managed["ctypes._Pointer[ffi.wasmtime_component_flags_type_t]"],
         raw = ffi.wasmtime_component_valflags_t()
         ffi.wasmtime_component_valflags_new_uninit(raw, len(val))
         for i, s in enumerate(val):
-            raw.data[i] = ffi.str_to_capi(s)
+            raw.data[i] = ffi_util.str_to_capi(s)
         ptr.contents.kind = ffi.WASMTIME_COMPONENT_FLAGS
         ptr.contents.of.flags = raw
 
@@ -1061,7 +1063,7 @@ class FlagsType(Managed["ctypes._Pointer[ffi.wasmtime_component_flags_type_t]"],
         assert(c.kind == ffi.WASMTIME_COMPONENT_FLAGS.value)
         result = set()
         for i in range(c.of.flags.size):
-            s = ffi.to_str(c.of.flags.data[i])
+            s = ffi_util.to_str(c.of.flags.data[i])
             result.add(s)
         ffi.wasmtime_component_valflags_delete(byref(c.of.flags))
         return result
@@ -1153,7 +1155,7 @@ class OwnType(ValType):
 
     def convert_from_c(self, c: 'ffi.wasmtime_component_val_t') -> Any:
         assert(c.kind == ffi.WASMTIME_COMPONENT_RESOURCE.value)
-        return ResourceAny._from_ptr(ffi.take_pointer(c.of, 'resource'))
+        return ResourceAny._from_ptr(ffi_util.take_pointer(c.of, 'resource'))
 
 
 @dataclass
@@ -1176,7 +1178,7 @@ class BorrowType(ValType):
 
     def convert_from_c(self, c: 'ffi.wasmtime_component_val_t') -> Any:
         assert(c.kind == ffi.WASMTIME_COMPONENT_RESOURCE.value)
-        return ResourceAny._from_ptr(ffi.take_pointer(c.of, 'resource'))
+        return ResourceAny._from_ptr(ffi_util.take_pointer(c.of, 'resource'))
 
 
 ComponentItem = Union[
